@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:orientation="horizontal"
+    android:paddingLeft="24dp"
+    android:paddingRight="12dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:layout_marginBottom="0dp">
+
+    <ImageView
+        android:id="@+id/packageStatusImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:adjustViewBounds="true"
+        android:maxHeight="23dp"
+        android:maxWidth="20dp"
+        android:scaleType="fitXY"
+
+        android:contentDescription="Delivery Status Image"
+        android:src="@drawable/delivered"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingLeft="24dp"
+        android:paddingRight="12dp"
+        android:orientation="vertical"
+        android:layout_toRightOf="@+id/packageStatusImageView">
+
+        <TextView
+            android:id="@+id/packageNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Package Name"
+            android:textStyle="normal"
+            android:textSize="20dp"
+            android:textColor="@color/package_title_text"/>
+
+        <TextView
+            android:id="@+id/packageStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status Update"
+            android:textColor="@color/description_text"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/divider"
+            android:layout_marginTop="14dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

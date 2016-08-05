@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item android:id="@+id/action_delete_delivery" android:title="Delete Delivery"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_edit_delivery" android:title="Edit Delivery"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_track_on_website" android:title="Track on Website"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_mark_delivered" android:title="@string/mark_as_delivered"
+        android:orderInCategory="100" app:showAsAction="never" />
+</menu>
