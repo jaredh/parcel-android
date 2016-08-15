@@ -8,10 +8,16 @@ import okhttp3.Response;
 
 
 public class AuthCookieInterceptor implements Interceptor {
+    private final String token;
+
+    public AuthCookieInterceptor (String token) {
+        this.token = token;
+    }
+
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request().newBuilder()
-                .addHeader("Cookie", "token=")
+                .addHeader("Cookie", "token=" + token)
                 .build();
 
         return chain.proceed(request);

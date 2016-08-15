@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.preference.PreferenceManager;
+import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,10 +22,14 @@ import android.widget.EditText;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import me.jrdh.parcel.api.AuthCookieInterceptor;
 import me.jrdh.parcel.api.AuthenticationService;
+import me.jrdh.parcel.api.UserAgentInterceptor;
 import me.jrdh.parcel.api.models.LoginRequest;
 import me.jrdh.parcel.api.models.LoginResponse;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -34,10 +40,10 @@ import rx.schedulers.Schedulers;
 public class LoginActivity extends AppCompatActivity {
 
     @BindView(R.id.email)
-    AutoCompleteTextView emailAutoTextView;
+    TextInputEditText emailAutoTextView;
 
     @BindView(R.id.password)
-    EditText passwordEditText;
+    TextInputEditText passwordEditText;
 
     @BindView(R.id.login_progress)
     View progressView;
@@ -57,16 +63,28 @@ public class LoginActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
+        // Generate device UUID if first time running
+        generateDeviceUUID();
+
         // Check if user is already logged in and get out of here ASAP
         if (isLoggedIn()) {
             startActivity(new Intent(this, ParcelActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             return;
         }
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .addInterceptor(new UserAgentInterceptor())
+                .addInterceptor(logging)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://secure.parcelapp.net")
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient)
                 .build();
 
         authService = retrofit.create(AuthenticationService.class);
@@ -83,6 +101,18 @@ public class LoginActivity extends AppCompatActivity {
 
         signInButton.setOnClickListener(v -> attemptLogin());
 
+    }
+
+    private void generateDeviceUUID() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (prefs.getString(ParcelSettings.UUID, "").isEmpty()) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(ParcelSettings.UUID, java.util.UUID.randomUUID().toString());
+            editor.apply();
+        }
+
+        Log.d("Parcel", "Device ID: " + prefs.getString(ParcelSettings.UUID, ""));
     }
 
 
@@ -124,9 +154,7 @@ public class LoginActivity extends AppCompatActivity {
         // perform the user login attempt.
         showProgress(true);
 
-        String uuid = java.util.UUID.randomUUID().toString();
-
-        LoginRequest loginRequest = new LoginRequest(email, uuid, password, "ios", "");
+        LoginRequest loginRequest = new LoginRequest(email, PreferenceManager.getDefaultSharedPreferences(this).getString(ParcelSettings.UUID, ""), password, "ios", "");
 
         showProgress(true);
 
@@ -161,14 +189,14 @@ public class LoginActivity extends AppCompatActivity {
     void storeCredentials (String userId, String hash) {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(this).edit();
 
-        prefs.putString("parcel_userid", userId);
-        prefs.putString("parcel_hash", hash);
+        prefs.putString(ParcelSettings.USER_ID, userId);
+        prefs.putString(ParcelSettings.HASH, hash);
         prefs.apply();
     }
 
     boolean isLoggedIn() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        return !prefs.getString("parcel_userid", "").isEmpty();
+        return !prefs.getString(ParcelSettings.USER_ID, "").isEmpty();
     }
 
     /**

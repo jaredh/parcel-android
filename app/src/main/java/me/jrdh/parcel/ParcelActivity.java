@@ -25,7 +25,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import me.jrdh.parcel.api.AuthCookieInterceptor;
+import me.jrdh.parcel.api.HmacInterceptor;
 import me.jrdh.parcel.api.ParcelService;
 import me.jrdh.parcel.api.ParcelShipmentsDeserializer;
 import me.jrdh.parcel.api.UserAgentInterceptor;
@@ -84,7 +84,7 @@ public class ParcelActivity extends AppCompatActivity {
 
     void updateShipmentData () {
         // FIXME: Duplicate code here, clean up and merge with loadJson method
-        apiService.getShipments(PreferenceManager.getDefaultSharedPreferences(this).getString("parcel_userid", ""))
+        apiService.getShipments()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -106,11 +106,12 @@ public class ParcelActivity extends AppCompatActivity {
     void initializeApiService() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
 
-        //logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient httpClient = new OkHttpClient.Builder()
                 .addInterceptor(new UserAgentInterceptor())
-                .addInterceptor(new AuthCookieInterceptor())
+                //.addInterceptor(new AuthCookieInterceptor(PreferenceManager.getDefaultSharedPreferences(this).getString(ParcelSettings.HASH, "")))
+                .addInterceptor(new HmacInterceptor(PreferenceManager.getDefaultSharedPreferences(this).getString(ParcelSettings.USER_ID, "")))
                 .addInterceptor(logging)
                 .build();
 
@@ -118,8 +119,8 @@ public class ParcelActivity extends AppCompatActivity {
 
         // Adding custom deserializers
         gsonBuilder.registerTypeAdapter(ShipmentUpdates.class, new ParcelShipmentsDeserializer());
-        Gson myGson = gsonBuilder.create();
-        GsonConverterFactory gsonConverter = GsonConverterFactory.create(myGson);
+        Gson gson = gsonBuilder.create();
+        GsonConverterFactory gsonConverter = GsonConverterFactory.create(gson);
 
         Retrofit rf = new Retrofit.Builder()
                 .baseUrl("https://data.parcelapp.net/")
@@ -132,7 +133,7 @@ public class ParcelActivity extends AppCompatActivity {
     }
 
     private void loadJson () {
-        apiService.getShipments(PreferenceManager.getDefaultSharedPreferences(this).getString("parcel_userid", ""))
+        apiService.getShipments()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -169,8 +170,8 @@ public class ParcelActivity extends AppCompatActivity {
 
     void clearUserSettings() {
         SharedPreferences.Editor prefs = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        prefs.remove("parcel_userid");
-        prefs.remove("parcel_hash");
+        prefs.remove(ParcelSettings.USER_ID);
+        prefs.remove(ParcelSettings.HASH);
         prefs.apply();
     }
 

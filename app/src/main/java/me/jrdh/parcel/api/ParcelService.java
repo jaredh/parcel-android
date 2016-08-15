@@ -13,30 +13,24 @@ public interface ParcelService {
     @POST("settings.php")
     void settings();
 
-    @GET("data.php?caller=no&compression=yes&version=4&time=1460440816&version=4")
-    Observable<ShipmentUpdates> getShipments(@Query("id") String userId);
+    @GET("data.php?caller=no&compression=yes&version=4")
+    Observable<ShipmentUpdates> getShipments();
 
     @GET("add.php?allow=yes&extra=")
     void add(@Query("type") String type,
              @Query("code") String code,
-             @Query("id") String userId,
-             @Query("name") String name,
-             @Query("verification") String verification);
+             @Query("name") String name);
 
     @GET("edit.php?allow=yes")
-    void edit(@Query("id") String userId,
-              @Query("oldtype") String oldType,
+    void edit(@Query("oldtype") String oldType,
               @Query("oldnumber") String oldNumber,
               @Query("code") String code,
               @Query("type") String type,
               @Query("language") String language,
               @Query("oldlabel") String oldLabel,
-              @Query("name") String name,
-              @Query("verification") String verification);
+              @Query("name") String name);
 
     @GET("delete.php?allow=yes")
-    void delete(@Query("id") String userId,
-                @Query("number") String number,
-                @Query("type") String type,
-                @Query("verification") String verification);
+    void delete(@Query("number") String number,
+                @Query("type") String type);
 }

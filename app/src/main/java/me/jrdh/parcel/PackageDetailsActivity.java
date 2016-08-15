@@ -30,7 +30,7 @@ public class PackageDetailsActivity extends AppCompatActivity implements OnMapRe
     private GoogleMap mMap;
 
     @BindView(R.id.packageDetails)
-    private RecyclerView detailsRecyclerView;
+    RecyclerView detailsRecyclerView;
 
     private Shipment shipment;
 
