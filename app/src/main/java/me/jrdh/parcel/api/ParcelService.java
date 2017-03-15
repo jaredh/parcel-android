@@ -17,12 +17,12 @@ public interface ParcelService {
     Observable<ShipmentUpdates> getShipments();
 
     @GET("add.php?allow=yes&extra=")
-    void add(@Query("type") String type,
+    Observable<Void> add(@Query("type") String type,
              @Query("code") String code,
              @Query("name") String name);
 
     @GET("edit.php?allow=yes")
-    void edit(@Query("oldtype") String oldType,
+    Observable<Void> edit(@Query("oldtype") String oldType,
               @Query("oldnumber") String oldNumber,
               @Query("code") String code,
               @Query("type") String type,
@@ -31,6 +31,6 @@ public interface ParcelService {
               @Query("name") String name);
 
     @GET("delete.php?allow=yes")
-    void delete(@Query("number") String number,
+    Observable<Void> delete(@Query("number") String number,
                 @Query("type") String type);
 }

@@ -45,6 +45,7 @@ public class ParcelShipmentsDeserializer implements JsonDeserializer<ShipmentUpd
         shipment.trackingNumber = jArray.get(0).getAsString();
         shipment.label = jArray.get(1).getAsString();
         shipment.type = jArray.get(2).getAsString();
+
         if (jArray.get(3).getAsString().equalsIgnoreCase("no"))
             shipment.update = false;
         else
@@ -53,6 +54,11 @@ public class ParcelShipmentsDeserializer implements JsonDeserializer<ShipmentUpd
         //Log.d("Parcel", "Package: " + shipment.label + " Delivered: " + jArray.get(3).getAsString());
 
         parseStatusUpdates(shipment, jArray.get(4).getAsJsonArray());
+
+        // 5 is unknown
+
+        shipment.dateAdded = jArray.get(6).getAsString();
+        shipment.dateExpected = jArray.get(7).getAsString();
 
         return shipment;
     }
