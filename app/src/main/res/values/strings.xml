@@ -26,5 +26,9 @@
     <!-- Parcel Activity Menu Options -->
     <string name="action_settings">Settings</string>
     <string name="action_logout">Sign Out</string>
+    <string name="pager_all">All</string>
+    <string name="pager_active">Active</string>
+    <string name="pager_delivered">Delivered</string>
+    <string name="pager_invalid">Invalid</string>
 
 </resources>

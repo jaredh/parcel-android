@@ -5,39 +5,35 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatTextView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import me.jrdh.parcel.api.AuthCookieInterceptor;
 import me.jrdh.parcel.api.AuthenticationService;
 import me.jrdh.parcel.api.UserAgentInterceptor;
 import me.jrdh.parcel.api.models.LoginRequest;
 import me.jrdh.parcel.api.models.LoginResponse;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity {
+    public static final String PARCEL_WEB_URL = "https://web.parcelapp.net/";
 
     @BindView(R.id.email)
     TextInputEditText emailAutoTextView;
@@ -54,6 +50,9 @@ public class LoginActivity extends AppCompatActivity {
     @BindView(R.id.email_sign_in_button)
     Button signInButton;
 
+    @BindView(R.id.login_sign_up)
+    AppCompatTextView signUpTextView;
+
     AuthenticationService authService;
 
     @Override
@@ -68,7 +67,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // Check if user is already logged in and get out of here ASAP
         if (isLoggedIn()) {
-            startActivity(new Intent(this, ParcelActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            startActivity(new Intent(this, ParcelActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
+            overridePendingTransition(0,0);
+            finish();
             return;
         }
 
@@ -101,6 +102,9 @@ public class LoginActivity extends AppCompatActivity {
 
         signInButton.setOnClickListener(v -> attemptLogin());
 
+        signUpTextView.setOnClickListener(v ->
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(PARCEL_WEB_URL)))
+        );
     }
 
     private void generateDeviceUUID() {

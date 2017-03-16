@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
@@ -11,9 +11,10 @@
         <item name="divider">@color/divider</item>
 
         <item name="colorControlNormal">#FFD000</item>
-        <item name="colorControlActivated">@android:color/white</item>
+<!--        <item name="colorControlActivated">@android:color/white</item>
         <item name="colorControlHighlight">@android:color/white</item>
         <item name="android:textColorHint">@android:color/white</item>
+        -->
     </style>
 
     <style name="AppTheme.WithoutActionBar">

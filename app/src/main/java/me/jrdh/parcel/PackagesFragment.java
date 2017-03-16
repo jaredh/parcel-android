@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,9 +43,7 @@ public class PackagesFragment extends Fragment {
         return fragment;
     }
 
-    public PackagesFragment() {
-        // Required empty public constructor
-    }
+    public PackagesFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,6 +63,8 @@ public class PackagesFragment extends Fragment {
 
         recyclerView.setAdapter(new PackagesAdapter(shipments));
 
+        registerForContextMenu(recyclerView);
+
         swipeRefreshLayout.setOnRefreshListener(this::sendRefreshEvent);
 
         return view;
@@ -78,6 +79,10 @@ public class PackagesFragment extends Fragment {
         shipments = updatedShipments;
 
         PackagesAdapter newAdapter = new PackagesAdapter(updatedShipments);
+
+        if (recyclerView == null)
+            Log.e("Parcel", "RECYCLER VIEW IS NULL!");
+
         recyclerView.swapAdapter(newAdapter, false);
         recyclerView.invalidate();
     }

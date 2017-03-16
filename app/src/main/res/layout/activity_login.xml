@@ -69,7 +69,8 @@
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:textColor="@android:color/white"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -84,7 +85,14 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:background="@color/accent"/>
-
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/login_sign_up"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
+                android:text="Sign up"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

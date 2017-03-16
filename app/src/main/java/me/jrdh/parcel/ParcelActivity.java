@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,7 +21,16 @@ import com.annimon.stream.Stream;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeComparator;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+import org.joda.time.format.DateTimeParser;
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,7 +49,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-
 public class ParcelActivity extends AppCompatActivity {
 
     @BindView(R.id.toolbar)
@@ -51,7 +60,10 @@ public class ParcelActivity extends AppCompatActivity {
     @BindView(R.id.parcel_viewpager)
     ViewPager viewPager;
 
-    List<Shipment> shipments;
+    @BindView(R.id.fabBtn)
+    FloatingActionButton fab;
+
+    List<Shipment> shipments = new ArrayList<>();
 
     ParcelService apiService;
 
@@ -66,24 +78,51 @@ public class ParcelActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_parcel);
 
         ButterKnife.bind(this);
 
-        if (toolbar != null)
-            setSupportActionBar(toolbar);
+        setSupportActionBar(toolbar);
 
         initializeApiService();
-        loadJson();
 
         getRxBusSingleton().toObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(a -> updateShipmentData());
+                .subscribe(a -> fetchShipmentData());
+
+        viewPager.setAdapter(new ViewPagerAdapter(getSupportFragmentManager()));
+        tabLayout.setupWithViewPager(viewPager);
+
+        fab.setOnClickListener(v ->
+                v.getContext().startActivity(
+                        new Intent(v.getContext(), AddPackageActivity.class)
+                )
+        );
+
     }
 
-    void updateShipmentData () {
-        // FIXME: Duplicate code here, clean up and merge with loadJson method
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        fetchShipmentData();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable("activity_shipments", Parcels.wrap(shipments));
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        shipments = Parcels.unwrap(savedInstanceState.getParcelable("activity_shipments"));
+    }
+
+    void fetchShipmentData() {
         apiService.getShipments()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -94,7 +133,10 @@ public class ParcelActivity extends AppCompatActivity {
     }
 
     void updateShipmentFragments(List<Shipment> shipments) {
+        sortAndUpdateShipments(shipments);
+
         this.shipments = shipments;
+
         // All
         ((PackagesFragment)((ViewPagerAdapter)viewPager.getAdapter()).getItem(0)).updateShipments(shipments);
         // Active
@@ -132,20 +174,14 @@ public class ParcelActivity extends AppCompatActivity {
         apiService = rf.create(ParcelService.class);
     }
 
-    private void loadJson () {
-        apiService.getShipments()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                shipments -> processShipments(shipments),
-                e -> Log.e("Parcel", "Failed get shipments: " + e.getMessage())
-            );
-    }
+    void sortAndUpdateShipments(List<Shipment> shipments) {
+        Collections.sort(shipments, (lhs, rhs) -> {
+            DateTime d1 = parseDateTime(lhs.dateExpected);
+            DateTime d2 = parseDateTime(rhs.dateExpected);
+            return DateTimeComparator.getInstance().compare(d1,d2);
+        });
 
-    void processShipments(ShipmentUpdates shipmentUpdates) {
-        shipments = shipmentUpdates.getShipments();
-        viewPager.setAdapter(new ViewPagerAdapter(getSupportFragmentManager()));
-        tabLayout.setupWithViewPager(viewPager);
+        Collections.reverse(shipments);
     }
 
     @Override
@@ -174,6 +210,19 @@ public class ParcelActivity extends AppCompatActivity {
         prefs.remove(ParcelSettings.HASH);
         prefs.apply();
     }
+
+    DateTime parseDateTime (String dateTime) {
+        DateTimeParser[] parsers = {
+                DateTimeFormat.forPattern( "yyyy-MM-dd" ).getParser(),
+                DateTimeFormat.forPattern( "yyyy-MM-dd HH:mm:ss" ).getParser(),
+                DateTimeFormat.forPattern( "yyyy-MM-dd HH:mm:ss.SSS" ).getParser(),
+                DateTimeFormat.forPattern( "yyyy-MM-dd HH:mm:ss.SSSSSS" ).getParser()};
+
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
+
+        return formatter.parseDateTime(dateTime);
+    }
+
 
     public class ViewPagerAdapter extends FragmentPagerAdapter {
         PackagesFragment allShipmentFragment;
@@ -207,13 +256,13 @@ public class ParcelActivity extends AppCompatActivity {
         public CharSequence getPageTitle (int position) {
             switch (position) {
                 case 0:
-                    return "All";
+                    return getString(R.string.pager_all);
                 case 1:
-                    return "Active";
+                    return getString(R.string.pager_active);
                 case 2:
-                    return "Delivered";
+                    return getString(R.string.pager_delivered);
                 default:
-                    return "Invalid";
+                    return getString(R.string.pager_invalid);
             }
 
         }

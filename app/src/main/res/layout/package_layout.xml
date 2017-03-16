@@ -7,7 +7,9 @@
     android:paddingRight="12dp"
     android:paddingStart="12dp"
     android:paddingEnd="12dp"
-    android:layout_marginBottom="0dp">
+    android:layout_marginBottom="0dp"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/packageStatusImageView"

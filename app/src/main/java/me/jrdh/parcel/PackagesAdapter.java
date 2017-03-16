@@ -22,7 +22,7 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
 
     private List<Shipment> shipments = new ArrayList<>();
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         @BindView(R.id.packageStatusImageView)
         ImageView packageStatusImageView;
@@ -45,7 +45,7 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
             ButterKnife.bind(this, v);
 
             v.setOnClickListener(this);
-
+            v.setOnLongClickListener(this);
         }
 
         @Override
@@ -54,6 +54,12 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
             Intent intent = new Intent(v.getContext(), PackageDetailsActivity.class);
             intent.putExtra(Shipment.class.getName(), Parcels.wrap(shipment));
             v.getContext().startActivity(intent);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            Log.d("Parcel", "longClick: " + packageNameTextView.getText());
+            return true;
         }
     }
 
@@ -84,6 +90,9 @@ public class PackagesAdapter extends RecyclerView.Adapter<PackagesAdapter.ViewHo
 
     @Override
     public int getItemCount() {
+        if (shipments == null)
+            return 0;
+
         return shipments.size();
     }
 }
